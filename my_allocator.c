@@ -1,17 +1,18 @@
-#include "my allocator.h"
+#include "my_allocator.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <sys/mman.h>
-
+#include <assert.h>
 
 //here we define some global variables and structure that will be shared among the following functions.
 //They must be allocated statically because they will be used in the allocator itself
 buddyAllocator buddy_allocator;
 char memory[MAX_BUDDY_ALLOCABLE_SIZE];
-uint8_t buffer[(1 << (BUDDY_LEVELS) -1)];
+uint8_t buffer[((1 << (BUDDY_LEVELS)) -1)];
 
 //Defining the function to initialize the allocator (it's just a wrapper for the other initializations needed)
 void init_allocator() {
-    init_buddy_allocator(&buddy_allocator, BUDDY_LEVELS, MIN_BUDDY_ALLOCABLE_SIZE, memory, buffer);
+    buddyAllocator_init(&buddy_allocator, BUDDY_LEVELS, MIN_BUDDY_ALLOCABLE_SIZE, memory, buffer);
 }
 
 //Defining the function to allocate memory
@@ -35,7 +36,7 @@ void* my_malloc(int size) {
 
 //Defining the function to free memory
 void my_free(void* ptr, int size) {
-    assert(ptr > 0 && size > 0); //invalid request
+    assert(ptr != NULL && size > 0); //invalid request
 
     //if the requested size is no greater than 1/4 of the page size, we can use the buddy allocator
     if(size <= PAGE_SIZE/4) {

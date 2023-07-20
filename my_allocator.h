@@ -1,5 +1,5 @@
 #pragma once
-#include "buddy allocator.h"
+#include "buddy_allocator.h"
 
 //here we define the parameters that will be used to build the buddy allocator
 #define PAGE_SIZE 4096                  //as the most common page size in moder systems

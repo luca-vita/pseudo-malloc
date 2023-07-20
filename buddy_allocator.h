@@ -9,7 +9,7 @@ typedef struct {
 } buddyAllocator;
 
 //declaring the function to initialize an allocated buddy allocator
-void buddyAllocator_init(buddyAllocator *ballocator, int num_levels, int min_bucket_size, char* memory, uint8_t* buffer);
+void buddyAllocator_init(buddyAllocator *ballocator, int num_levels, int min_bucket_size, char *memory, uint8_t *buffer);
 
 //declaring the function to get the memory address of the buddy at the given index (the buddies will be managed using their indexes
 //and only when needed the actual memory address will be calculated and used)

@@ -9,10 +9,10 @@ typedef struct  {
 } bitmap;
 
 //declaring the function to initialize an allocated bitmap
-int bitmap_init(bitmap *bmap, int num_bits, uint8_t* buffer);
+void bitmap_init(bitmap *bmap, int num_bits, uint8_t* buffer);
 
 //declaring the function to set a bit in the bitmap
-int bitmap_set(bitmap *bmap, int bit, int value);
+void bitmap_set(bitmap *bmap, int bit, int value);
 
-//declaring the function to set a bit in the bitmap
-int bitmap_reset(bitmap *bmap, int bit);
+//declaring the function to get a bit in the bitmap
+int bitmap_get(bitmap *bmap, int bit);
