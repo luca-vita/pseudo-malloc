@@ -43,7 +43,7 @@ void buddyAllocator_init(buddyAllocator *ballocator, int num_levels, int min_buc
     ballocator->min_bucket_size = min_bucket_size;
     ballocator->memory = memory;
     //the initialization of the buddy allocator includes the initialization of its bitmap
-    int num_bits = (1 << num_levels-1 ); //era (1 << num_levels) - 1
+    int num_bits = (1 << num_levels) - 1 ;  //one bit for each node of the binary tree
     bitmap_init(&(ballocator->bmap),  num_bits, buffer);
 
     //setting the root node as available (1 available, 0 not available)
@@ -68,6 +68,10 @@ int buddyAllocator_getFittestLevel(buddyAllocator *ballocator, int size){
 
 //Defining the function to get the index of the first available buddy of a given level
 int buddyAllocator_getFirstAvailable(buddyAllocator *ballocator, int level){
+    if(level < 0){
+        return -1; //the requested memory exceeds the maximum allocatable size
+    }
+    assert(level < ballocator->num_levels);
     int first = getFirst(level);
     int last = getFirst(level+1)-1;
     for(int i=first; i<=last; i++){
@@ -141,5 +145,10 @@ char* buddyAllocator_malloc(buddyAllocator *ballocator, int size){
 //Defining the function to deallocate a buddy address
 void buddyAllocator_free(buddyAllocator *ballocator, char* address){
     int index = *((int*)(address - 4));
+    if(index > ballocator->bmap->num_bits){
+        printf("The index is not compatible with this buddy allocator. It must be freed with the same allocator it was allocated with\n");
+        return;
+    }
+    assert(index >= 0);
     buddyAllocator_restoreBuddies(ballocator, index);
 }
