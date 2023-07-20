@@ -43,12 +43,13 @@ void buddyAllocator_init(buddyAllocator *ballocator, int num_levels, int min_buc
     ballocator->num_levels = num_levels;
     ballocator->min_bucket_size = min_bucket_size;
     ballocator->memory = memory;
+
     //the initialization of the buddy allocator includes the initialization of its bitmap
     int num_bits = (1 << num_levels) - 1 ;  //one bit for each node of the binary tree
-    bitmap_init(ballocator->bmap,  num_bits, buffer);
+    bitmap_init(&ballocator->bmap,  num_bits, buffer);
 
     //setting the root node as available (1 available, 0 not available)
-    bitmap_set(ballocator->bmap, 0, 1);
+    bitmap_set(&ballocator->bmap, 0, 1);
 
     printf("BUDDY ALLOCATOR INITIALIZATION FINISHED\n");
     printf("\tIt has %d levels\n", ballocator->num_levels);
@@ -76,7 +77,7 @@ int buddyAllocator_getFirstAvailable(buddyAllocator *ballocator, int level){
     int first = getFirst(level);
     int last = getFirst(level+1)-1;
     for(int i=first; i<=last; i++){
-        if(bitmap_get(ballocator->bmap, i) == 1)
+        if(bitmap_get(&ballocator->bmap, i) == 1)
             return i;
     }
     return -1;
@@ -97,11 +98,11 @@ int buddyAllocator_chooseBuddy(buddyAllocator *ballocator, int level){
         else{
             chosen = getLeft(greater_buddy);
             int discarded = getRight(greater_buddy);
-            bitmap_set(ballocator->bmap, discarded, 1);
+            bitmap_set(&ballocator->bmap, discarded, 1);
         }
     }
     //setting the chosen buddy as not available
-    bitmap_set(ballocator->bmap, chosen, 0);
+    bitmap_set(&ballocator->bmap, chosen, 0);
     //setting the chosen buddy's ancestors as not available
     return chosen;
 }
@@ -110,14 +111,14 @@ int buddyAllocator_chooseBuddy(buddyAllocator *ballocator, int level){
 void buddyAllocator_restoreBuddies(buddyAllocator *ballocator, int index){
     int buddy = getBuddy(index);
     if(buddy == -1)
-        bitmap_set(ballocator->bmap, index, 1);
-    if(bitmap_get(ballocator->bmap, buddy) == 1){
-        bitmap_set(ballocator->bmap, index, 0);
-        bitmap_set(ballocator->bmap, buddy, 0);
+        bitmap_set(&ballocator->bmap, index, 1);
+    if(bitmap_get(&ballocator->bmap, buddy) == 1){
+        bitmap_set(&ballocator->bmap, index, 0);
+        bitmap_set(&ballocator->bmap, buddy, 0);
         buddyAllocator_restoreBuddies(ballocator, getParent(index));
     }
     else{
-        bitmap_set(ballocator->bmap, index, 1);
+        bitmap_set(&ballocator->bmap, index, 1);
     }
 }
 
@@ -148,7 +149,7 @@ char* buddyAllocator_malloc(buddyAllocator *ballocator, int size){
 //Defining the function to deallocate a buddy address
 void buddyAllocator_free(buddyAllocator *ballocator, char* address){
     int index = *((int*)(address - 4));
-    if(index > ballocator->bmap->num_bits){
+    if(index > ballocator->bmap.num_bits){
         printf("The index is not compatible with this buddy allocator. It must be freed with the same allocator it was allocated with\n");
         return;
     }

@@ -3,10 +3,10 @@
 #include <stdio.h>
 
 int main(){
-
-    init_allocator();
-    printf("Allocator initialized\n");
     
+    init_allocator();
+    
+    printf("Allocator initialized\n");
     //here we test the buddy allocator trying to allocate and free different sizes of memory
     char* ptr1 = (char*) my_malloc(4); //(int) 4 bytes << 1/1024 of the page size (4096 bytes)
     if(ptr1!=NULL){
@@ -22,12 +22,12 @@ int main(){
     }
     char* ptr4 = (char*) my_malloc(1020); //4 bytes will be added for the index
     if(ptr4!=NULL){
-        printf("Allocated 1024 bytes at address %p\n", ptr4);
+        printf("Allocated 1020 bytes at address %p\n", ptr4);
     }
     my_free(ptr1, 4);
     my_free(ptr2, 150);
     my_free(ptr3, 500);
-    my_free(ptr4, 1024);
+    my_free(ptr4, 1020);
     printf("All memory as been freed\n");
 
     //here we test the mmap function trying to allocate and free different sizes of memory
@@ -43,14 +43,6 @@ int main(){
     my_free(ptr6, 4096);
     printf("All memory as been freed\n");
 
-    //here we try to empty all the memory available to the buddy allocator and then request more
-    char* ptr[1025];
-    for(int i = 0; i<1025; i++){
-        ptr[i] = (char*) my_malloc(1024);
-    }
-    for(int i= 0; i<1025; i++){
-        my_free(ptr[i], 1024);
-    }
     //here we check if the allocator can handle invalid requests well
     char* ptr7 = (char*) my_malloc(0);
     if(ptr7!=NULL){

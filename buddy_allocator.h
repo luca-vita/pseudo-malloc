@@ -4,7 +4,7 @@
 typedef struct {
     int num_levels;
     int min_bucket_size;
-    bitmap* bmap;
+    bitmap bmap;
     char* memory;
 } buddyAllocator;
 

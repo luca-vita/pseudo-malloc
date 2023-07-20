@@ -5,7 +5,7 @@
 typedef struct  {
     int buffer_size;
     int num_bits;
-    uint8_t *buffer;
+    uint8_t* buffer;
 } bitmap;
 
 //declaring the function to initialize an allocated bitmap
