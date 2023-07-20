@@ -27,6 +27,14 @@ int getBuddy(int index){
 int getFirst(int level){
     return (1 << level)-1;
 }
+//Get the index of the left child of the node at given index
+int getLeft(int index){
+    return 2*index+1;
+}
+//Get the index of the right child of the node at given index
+int getRight(int index){
+    return 2*index+2;
+}
 
 //Defining the function to initialize the buddy allocator
 void buddyAllocator_init(buddyAllocator *ballocator, int num_levels, int min_bucket_size, char* memory, uint8_t* buffer){
@@ -69,9 +77,69 @@ int buddyAllocator_getFirstAvailable(buddyAllocator *ballocator, int level){
     return -1;
 }
 
+//Defining the function to choose the index of the buddy to allocate for a given size request and to do side effect on the bitmap 
+//to reflect the splitting operations that might be needed
+int buddyAllocator_chooseBuddy(buddyAllocator *ballocator, int level){
+    if(level < 0){
+        printf("Could not find a buddy to allocate for this request\n");
+        return -1;
+    }
+    int chosen = buddyAllocator_getFirstAvailable(ballocator, level);
+    if(chosen == -1){
+        int greater_buddy = buddyAllocator_chooseBuddy(ballocator, level-1);
+        if(greater_buddy == -1)
+            return -1;
+        else
+            chosen = getLeft(greater_buddy);
+            int discarded = getRight(greater_buddy);
+            bitmap_set_bit(&(ballocator->bmap), discarded, 1);
+    }
+    //setting the chosen buddy as not available
+    bitmap_set_bit(&(ballocator->bmap), chosen, 0);
+    //setting the chosen buddy's ancestors as not available
+    return chosen;
+}
+
+//Defining the function that does side effect on the bitmap to reflect the merging operations that might follow a deallocation
+void buddyAllocator_restoreBuddies(buddyAllocator *ballocator, int index){
+    int buddy = getBuddy(index);
+    if(buddy == -1)
+        bitmap_set_bit(&(ballocator->bmap), index, 1);
+    if(bitmap_get(&(ballocator->bmap), buddy) == 1){
+        bitmap_set_bit(&(ballocator->bmap), index, 0);
+        bitmap_set_bit(&(ballocator->bmap), buddy, 0);
+        buddyAllocator_restoreBuddies(ballocator, getParent(index));
+    }
+    else{
+        bitmap_set_bit(&(ballocator->bmap), index, 1);
+    }
+}
+
 //Defining the function to get the memory address of the buddy at the given index (the buddies will be managed using their indexes
 //and only when needed the actual memory address will be calculated and used)
 char* buddyAllocator_getBuddyAddress(buddyAllocator *ballocator, int index){
     int level = getLevel(index);
     int offset = (index - getFirst(level)) * ballocator->min_bucket_size * (1 << (ballocator->num_levels - level - 1));
+}
+
+//Defining the function to allocate a buddy address of the given size. We also need a way to keep track of the allocated index
+//in order to restore it when the deallocation of this address will be requested. We can do this by storing the index in the
+//first 4 bytes (an int) of the allocated memory. We need to allocate more than requested.
+char* buddyAllocator_malloc(buddyAllocator *ballocator, int size){
+    int level = buddyAllocator_getFittestLevel(ballocator, size+4);
+    int index = buddyAllocator_chooseBuddy(ballocator, level);
+    if(index == -1){
+        printf("The available memory is not sufficient\n");
+        return NULL;
+    }
+    //setting the index in the first 4 bytes of the allocated memory
+    char* address = buddyAllocator_getBuddyAddress(ballocator, index);
+    *((int*)address) = index; //the cast to an integer pointer is needed to make sure that the index is only written in the first 4 bytes
+    return address + 4;
+}
+
+//Defining the function to deallocate a buddy address
+void buddyAllocator_free(buddyAllocator *ballocator, char* address){
+    int index = *((int*)(address - 4));
+    buddyAllocator_restoreBuddies(ballocator, index);
 }

@@ -20,3 +20,16 @@ int buddyAllocator_getFittestLevel(buddyAllocator *ballocator, int size);
 
 //declaring the function to get the index of the first available buddy of a given level
 int buddyAllocator_getFirstAvailable(buddyAllocator *ballocator, int level);
+
+//declaring the function to choose the index of the buddy to allocate for a given size request
+int buddyAllocator_chooseBuddy(buddyAllocator *ballocator, int level);
+
+//declaring the function that does side effect on the bitmap to reflect the merging operations that might follow the deallocation
+//of the buddy at the given index
+void buddyAllocator_restoreBuddies(buddyAllocator *ballocator, int index);
+
+//declaring the function to allocate a buddy address of the given size
+char* buddyAllocator_malloc(buddyAllocator *ballocator, int size);
+
+//declaring the function to deallocate a buddy address
+void buddyAllocator_free(buddyAllocator *ballocator, char* address);
