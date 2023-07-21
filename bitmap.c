@@ -6,8 +6,6 @@
 //defining the function to initialize an allocated bitmap
 void bitmap_init(bitmap *bmap, int num_bits, uint8_t* buffer){
     bmap->num_bits = num_bits;
-    printf("prova ");
-    fflush(stdout);
     bmap->buffer = buffer;
     bmap->buffer_size = (num_bits + 7) / 8; //this way it's rounded to the ceiling of the actual division (9 bits require 2 bytes)    
 }

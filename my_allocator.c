@@ -17,8 +17,11 @@ void init_allocator() {
 
 //Defining the function to allocate memory
 void* my_malloc(int size) {
-    assert(size > 0); //invalid request
-
+    if(size <= 0){
+        printf("invalid request\n");
+        return NULL;
+    } //invalid request
+    size+=4;
     //if the requested size is no greater than 1/4 of the page size, we can use the buddy allocator
     if(size <= PAGE_SIZE/4) {
         return buddyAllocator_malloc(&buddy_allocator, size);
@@ -36,8 +39,11 @@ void* my_malloc(int size) {
 
 //Defining the function to free memory
 void my_free(void* ptr, int size) {
-    assert(ptr != NULL && size > 0); //invalid request
-
+    if(ptr == NULL || size <= 0){
+        printf("invalid request\n");
+        return;
+    } //invalid request
+    size+=4;
     //if the requested size is no greater than 1/4 of the page size, we can use the buddy allocator
     if(size <= PAGE_SIZE/4) {
         buddyAllocator_free(&buddy_allocator, ptr);

@@ -141,6 +141,7 @@ char* buddyAllocator_malloc(buddyAllocator *ballocator, int size){
         return NULL;
     }
     //setting the index in the first 4 bytes of the allocated memory
+    printf("The buddy at index %d has been assigned (its size is %d)\n", index, ballocator->min_bucket_size * (1 << (ballocator->num_levels - getLevel(index) - 1)));
     char* address = buddyAllocator_getBuddyAddress(ballocator, index);
     *((int*)address) = index; //the cast to an integer pointer is needed to make sure that the index is only written in the first 4 bytes
     return address + 4;
@@ -149,6 +150,7 @@ char* buddyAllocator_malloc(buddyAllocator *ballocator, int size){
 //Defining the function to deallocate a buddy address
 void buddyAllocator_free(buddyAllocator *ballocator, char* address){
     int index = *((int*)(address - 4));
+    printf("The buddy at index %d has been freed\n", index);
     if(index > ballocator->bmap.num_bits){
         printf("The index is not compatible with this buddy allocator. It must be freed with the same allocator it was allocated with\n");
         return;
