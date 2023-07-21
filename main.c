@@ -55,8 +55,15 @@ int main(){
     my_free(ptr6, 4096);
     printf("All memory as been freed\n\n");
 
+
+    printf("TESTING THE BUDDY ALLOCATOR BEHAVIOR WHEN TRYING MEMORY IS SATURATED\n");
+    char* ptrs[20];
+	for (int i = 0; i < 20; ++i)
+	{
+		ptrs[i] = (char*) my_malloc(1020);
+	}
     //here we check if the allocator can handle invalid requests well
-    printf("TESTING INVALID REQUESTS\n");
+    printf("\nTESTING INVALID REQUESTS\n");
     printf("Trying to allocate 0+4 bytes\n");
     char* ptr7 = (char*) my_malloc(0);
     if(ptr7!=NULL){
